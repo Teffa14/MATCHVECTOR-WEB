@@ -36,7 +36,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages
-          git worktree add /tmp/matchvector-pages gh-pages
+          git worktree add -B gh-pages /tmp/matchvector-pages origin/gh-pages
           find /tmp/matchvector-pages -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp index.html app.js styles.css config.js favicon.svg .nojekyll /tmp/matchvector-pages/
           cd /tmp/matchvector-pages
