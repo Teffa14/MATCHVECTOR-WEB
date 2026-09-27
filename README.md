@@ -22,7 +22,7 @@ Runtime API configuration lives in `config.js`.
 Current expected API origin:
 
 ```text
-https://matchvector-api-teffa14.onrender.com
+https://matchvector-api-teffa14-v2.onrender.com
 ```
 
 The visible Overview, Match Report, Player DNA, Pricing and Economics values are synthetic product-demo data. Real replay data appears only in generated backend reports.
