@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: matchvector-web-teffa14
+    runtime: static
+    buildCommand: rm -rf dist && mkdir -p dist && cp index.html app.js styles.css config.js favicon.svg dist/
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: same-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=()
