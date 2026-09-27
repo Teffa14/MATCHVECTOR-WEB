@@ -43,4 +43,4 @@ jobs:
           test -s app.js
           test -s config.js
           test -s favicon.svg
-          grep -q "matchvector-api-teffa14.onrender.com" config.js
+          grep -q "matchvector-api-teffa14-v2.onrender.com" config.js
