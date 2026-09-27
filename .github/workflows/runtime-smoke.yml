@@ -1,0 +1,41 @@
+name: pinned-vrfkit-linux-smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/runtime-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  vrfkit-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VRFKIT_COMMIT: 259ed10c7e0c9d87c852f80fab7535d38d2e187f
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.86.0"
+      - name: Build pinned vrfkit on Linux
+        run: |
+          git clone --filter=blob:none --no-checkout https://github.com/yakisoba0728/vrfkit.git /tmp/vrfkit
+          git -C /tmp/vrfkit fetch --depth 1 origin "$VRFKIT_COMMIT"
+          git -C /tmp/vrfkit checkout --detach "$VRFKIT_COMMIT"
+          cargo +1.86.0 build --manifest-path /tmp/vrfkit/Cargo.toml --release -p vrfkit --features export --locked
+          /tmp/vrfkit/target/release/vrfkit --help >/dev/null
+      - name: Export a pinned public replay on Linux
+        run: |
+          REPLAY=/tmp/public-12.10.vrf
+          OUT=/tmp/vrfkit-export
+          curl --fail --location --retry 3 \
+            "https://raw.githubusercontent.com/michel-giehl/ValorantReplayParser/b51d67423b7b4952d59051cf91e55efa1c42da05/tests/Test.Integration/Replays/9f8b32c5-c243-41ec-bbbb-832582edf652.12_10.vrf" \
+            --output "$REPLAY"
+          echo "a4ce1b72f9bdf99492162013c1c909e6994a0d22bef1899e687fde71fbc86606  $REPLAY" | sha256sum --check
+          /tmp/vrfkit/target/release/vrfkit export "$REPLAY" --out "$OUT"
+          test -d "$OUT"
+          test -n "$(find "$OUT" -type f -print -quit)"
