@@ -1,0 +1,49 @@
+name: publish-static-pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "app.js"
+      - "styles.css"
+      - "config.js"
+      - "favicon.svg"
+      - ".nojekyll"
+      - ".github/workflows/publish-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matchvector-pages-source
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Sync static surface to gh-pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages
+          git worktree add /tmp/matchvector-pages gh-pages
+          find /tmp/matchvector-pages -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp index.html app.js styles.css config.js favicon.svg .nojekyll /tmp/matchvector-pages/
+          cd /tmp/matchvector-pages
+          git add -A
+          if git diff --cached --quiet; then
+            echo "gh-pages already matches main static surface."
+            exit 0
+          fi
+          git commit -m "deploy: sync MATCHVECTOR static surface"
+          git push origin HEAD:gh-pages
