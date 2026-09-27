@@ -195,6 +195,15 @@
     return value.toFixed(index === 0 ? 0 : 1) + " " + units[index];
   }
 
+  function apiUrl(value) {
+    if (!value) return API_BASE;
+    try {
+      return new URL(value, API_BASE + "/").toString();
+    } catch (_) {
+      return API_BASE + String(value);
+    }
+  }
+
   function uploadRequest(file, onProgress) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -223,7 +232,7 @@
 
   async function pollJob(statusUrl, onState) {
     for (let i = 0; i < MAX_POLLS; i += 1) {
-      const res = await fetch(statusUrl, {cache:"no-store"});
+      const res = await fetch(apiUrl(statusUrl), {cache:"no-store"});
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.detail || "Could not read replay job status.");
       onState(body);
@@ -329,7 +338,7 @@
         setStage("stageReport", "done");
         status.className = "status-box success";
         status.innerHTML = 'Report ready. <a class="btn" style="margin-left:8px" target="_blank" rel="noopener" href="' +
-          finished.report_url + '">Open report</a>';
+          apiUrl(finished.report_url) + '">Open report</a>';
         checkBackend();
       } catch (err) {
         setStage("stageUpload", "failed");
